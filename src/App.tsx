@@ -7,6 +7,8 @@ import {
 } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import TimerView from './TimerView'
+import Header from './header'
+import { BrowserRouter } from 'react-router-dom'
 
 const App = () => {
 	return (
@@ -16,7 +18,10 @@ const App = () => {
 					<GlobalStyle />
 					<ThemeProvider theme={styledComponentsTheme}>
 						<CssBaseline />
-						<TimerView />
+						<BrowserRouter>
+							<Header />
+							<TimerView />
+						</BrowserRouter>
 					</ThemeProvider>
 				</ThemeProviderMui>
 			</StylesProvider>
