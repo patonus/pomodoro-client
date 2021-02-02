@@ -3,11 +3,11 @@ import Styled from 'styled-components/macro'
 export const FinishedContainer = Styled.div`
  	background-color:${(props) => props.theme.light2};
    padding: 0.5em ;
-   margin-bottom: 0.5em;
-   max-width:1000px;
-   margin-right:auto;
-   margin-left:auto;
+   margin: 0 auto 0.5em auto; 
+   max-width:1000px;  
    border-radius: 3px;
+	box-shadow: 0 -2px 10px black;
+
 
 `
 

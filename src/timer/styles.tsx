@@ -9,9 +9,10 @@ export const TimerContainer = Styled.div<{ isWork: boolean }>`
    	"clock clock"
    	"start stop";
    	max-width:500px;
-   	margin: auto;
+	margin: 0 auto 0.5em auto; 
    	row-gap:0.2em;
 	border-radius: 3px;
+	box-shadow: 0 -2px 10px black;
 
 `
 
