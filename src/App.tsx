@@ -12,25 +12,37 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom'
 import SettingsView from './views/SettingsView'
 import HistoryView from './views/HistoryView'
 import { useState, useEffect } from 'react'
-import { DoneInterval } from './interfaces'
+import { Config, DoneInterval } from './interfaces'
 
-const breakTime = { minutes: 0, seconds: 5 }
-const workTime = { minutes: 0, seconds: 3 }
+const defaultConfig = {
+	volume: 100,
+	workDuration: 25,
+	shortBreakDuration: 5,
+	longBreakDuration: 20,
+	pomodoroCount: 4,
+}
 
 const App = () => {
-	const initial = JSON.parse(localStorage.getItem('intervals') || '[]')
-	const [doneIntervals, setDoneIntervals] = useState<DoneInterval[]>(initial)
-	console.log(doneIntervals)
-
+	const initialPomodoros = JSON.parse(localStorage.getItem('intervals') || '[]')
+	const [doneIntervals, setDoneIntervals] = useState<DoneInterval[]>(
+		initialPomodoros
+	)
 	useEffect(() => {
 		localStorage.setItem('intervals', JSON.stringify(doneIntervals))
 	}, [doneIntervals])
+
+	const configString = localStorage.getItem('config')
+	const initialConfig = configString ? JSON.parse(configString) : defaultConfig
+	const [config, setConfig] = useState<Config>(initialConfig)
+	useEffect(() => {
+		localStorage.setItem('config', JSON.stringify(config))
+	}, [config])
 
 	const addInterval = (finished: string, isWork: boolean) => {
 		const newInterval: DoneInterval = {
 			id: finished,
 			isWork: isWork,
-			duration: isWork ? workTime : breakTime,
+			duration: isWork ? config.workDuration : config.shortBreakDuration,
 			finished: finished,
 			note: '',
 		}
@@ -58,15 +70,14 @@ const App = () => {
 								<Route exact path='/'>
 									<TimerView
 										addInterval={addInterval}
-										breakTime={breakTime}
-										workTime={workTime}
+										config={config}
 										doneIntervals={doneIntervals}
 										updateInterval={updateInterval}
 										deleteInterval={deleteInterval}
 									/>
 								</Route>
 								<Route path='/settings'>
-									<SettingsView />
+									<SettingsView config={config} onChangeConfig={setConfig} />
 								</Route>
 								<Route path='/history'>
 									<HistoryView

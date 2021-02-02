@@ -1,12 +1,15 @@
-export interface Time {
-	minutes: number
-	seconds: number
-}
-
 export interface DoneInterval {
 	id: string
-	duration: Time
+	duration: number
 	finished: string
 	note: string
 	isWork: boolean
+}
+
+export interface Config {
+	volume: number
+	workDuration: number
+	shortBreakDuration: number
+	longBreakDuration: number
+	pomodoroCount: number
 }

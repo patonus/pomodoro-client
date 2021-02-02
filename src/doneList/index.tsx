@@ -32,7 +32,7 @@ const DoneItem = ({ interval, onUpdate, onDelete }: DoneItemProps) => (
 		<RecordHeader>
 			<DurationLabelContainer>
 				<Icon>{interval.isWork ? <GiReceiveMoney /> : <FaCoffee />}</Icon>
-				<DateTime>{interval.duration.minutes + 'm'}</DateTime>
+				<DateTime>{interval.duration + 'm'}</DateTime>
 			</DurationLabelContainer>
 			<DateTime>{formatDate(interval.finished)}</DateTime>
 			<TrashButton onClick={() => onDelete(interval.id)}>

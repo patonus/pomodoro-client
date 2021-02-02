@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Time } from '../interfaces'
+import { Config } from '../interfaces'
 import { TimerContainer, Clock } from './styles'
 import { useMachine } from '@xstate/react'
 import generateTimerMachine from './stateMachine'
@@ -9,16 +9,13 @@ import useSound from 'use-sound'
 import notifySound from 'assets/notify.mp3'
 interface Props {
 	onDone: (finished: string, isWork: boolean) => void
-	breakTime: Time
-	workTime: Time
+	config: Config
 }
 
-const Timer = ({ onDone, breakTime, workTime }: Props) => {
-	const [playSound] = useSound(notifySound, { volume: 1 })
+const Timer = ({ onDone, config }: Props) => {
+	const [playSound] = useSound(notifySound, { volume: config.volume / 100 })
 
-	const [current, send] = useMachine(
-		generateTimerMachine(workTime, breakTime, onDone)
-	)
+	const [current, send] = useMachine(generateTimerMachine(config, onDone))
 	const { elapsed, duration } = current.context
 	const currentState = current.value.toString()
 	const isWork = currentState.includes('work')

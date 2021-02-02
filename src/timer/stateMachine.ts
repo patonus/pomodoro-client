@@ -1,13 +1,12 @@
 import dayjs from 'dayjs'
-import { Time } from '../interfaces'
+import { Config } from '../interfaces'
 import { Machine, assign } from 'xstate'
 import * as workerTimers from 'worker-timers'
 
 const REFRESH_RATE = 1000
 
 const generateTimerMachine = (
-	workTime: Time,
-	breakTime: Time,
+	config: Config,
 	onDone: (finished: string, isWork: boolean) => void
 ) =>
 	Machine(
@@ -17,7 +16,7 @@ const generateTimerMachine = (
 			context: {
 				elapsed: 0,
 				interval: REFRESH_RATE,
-				duration: dayjs.duration(workTime),
+				duration: dayjs.duration({ minutes: config.workDuration }),
 				start: dayjs(),
 			},
 
@@ -102,19 +101,15 @@ const generateTimerMachine = (
 		{
 			actions: {
 				initializeWork: assign((_context) => ({
-					// start: dayjs(),
-					duration: dayjs.duration(workTime),
+					duration: dayjs.duration({ minutes: config.workDuration }),
 					elapsed: 0,
 				})),
 				initializeBreak: assign((_context) => ({
-					// start: dayjs(),
-
-					duration: dayjs.duration(breakTime),
+					duration: dayjs.duration({ minutes: config.shortBreakDuration }),
 					elapsed: 0,
 				})),
 				initializeTimer: assign((_context) => ({ start: dayjs() })),
 				incrementElapsed: assign(({ elapsed, interval }) => {
-					console.log('tick')
 					return {
 						elapsed: elapsed + interval,
 					}
@@ -127,8 +122,7 @@ const generateTimerMachine = (
 				},
 			},
 			guards: {
-				timeOut: ({ elapsed, duration, start }) => {
-					console.log(dayjs().diff(start))
+				timeOut: ({ elapsed, duration }) => {
 					return elapsed >= duration.asMilliseconds()
 				},
 			},
