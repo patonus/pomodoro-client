@@ -9,7 +9,7 @@ export const HeaderContainer = Styled.header`
     display:flex;
     justify-content: space-between;
     align-items: center;
-
+    z-index:50;
 
 `
 export const LinkList = Styled.ul`
