@@ -11,9 +11,9 @@ import Header from './header'
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
 import SettingsView from './views/SettingsView'
 import HistoryView from './views/HistoryView'
-import { useState, useEffect } from 'react'
-import { Config, DoneInterval } from './interfaces'
+import { DoneInterval } from './interfaces'
 import { isSameDate } from './utils'
+import useLocalStorage from './useLocalStorage'
 
 const defaultConfig = {
 	volume: 100,
@@ -24,20 +24,11 @@ const defaultConfig = {
 }
 
 const App = () => {
-	const initialPomodoros = JSON.parse(localStorage.getItem('intervals') || '[]')
-	const [doneIntervals, setDoneIntervals] = useState<DoneInterval[]>(
-		initialPomodoros
-	)
-	useEffect(() => {
-		localStorage.setItem('intervals', JSON.stringify(doneIntervals))
-	}, [doneIntervals])
+	const [activePomodoro, setActivePomodoro] = useLocalStorage('active', null)
 
-	const configString = localStorage.getItem('config')
-	const initialConfig = configString ? JSON.parse(configString) : defaultConfig
-	const [config, setConfig] = useState<Config>(initialConfig)
-	useEffect(() => {
-		localStorage.setItem('config', JSON.stringify(config))
-	}, [config])
+	const [doneIntervals, setDoneIntervals] = useLocalStorage('intervals', [])
+
+	const [config, setConfig] = useLocalStorage('config', defaultConfig)
 
 	const addInterval = (finished: string, isWork: boolean) => {
 		const newInterval: DoneInterval = {
@@ -47,16 +38,18 @@ const App = () => {
 			finished: finished,
 			note: '',
 		}
-		setDoneIntervals((i) => [...i, newInterval])
+		setDoneIntervals((i: DoneInterval[]) => [...i, newInterval])
 	}
 	const updateInterval = (newInterval: DoneInterval) => {
-		setDoneIntervals((intervals) => [
+		setDoneIntervals((intervals: DoneInterval[]) => [
 			...intervals.filter((i) => i.id !== newInterval.id),
 			newInterval,
 		])
 	}
 	const deleteInterval = (id: string) => {
-		setDoneIntervals((intervals) => intervals.filter((i) => i.id !== id))
+		setDoneIntervals((intervals: DoneInterval[]) =>
+			intervals.filter((i) => i.id !== id)
+		)
 	}
 	return (
 		<HelmetProvider>
@@ -72,8 +65,9 @@ const App = () => {
 									<TimerView
 										addInterval={addInterval}
 										config={config}
-										doneIntervals={doneIntervals.filter(({ finished }) =>
-											isSameDate(finished)
+										setActive={setActivePomodoro}
+										doneIntervals={doneIntervals.filter(
+											({ finished }: DoneInterval) => isSameDate(finished)
 										)}
 										updateInterval={updateInterval}
 										deleteInterval={deleteInterval}
