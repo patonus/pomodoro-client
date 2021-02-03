@@ -13,6 +13,7 @@ import SettingsView from './views/SettingsView'
 import HistoryView from './views/HistoryView'
 import { useState, useEffect } from 'react'
 import { Config, DoneInterval } from './interfaces'
+import { isSameDate } from './utils'
 
 const defaultConfig = {
 	volume: 100,
@@ -71,7 +72,9 @@ const App = () => {
 									<TimerView
 										addInterval={addInterval}
 										config={config}
-										doneIntervals={doneIntervals}
+										doneIntervals={doneIntervals.filter(({ finished }) =>
+											isSameDate(finished)
+										)}
 										updateInterval={updateInterval}
 										deleteInterval={deleteInterval}
 									/>
@@ -81,8 +84,6 @@ const App = () => {
 								</Route>
 								<Route path='/history'>
 									<HistoryView
-										availableDates={['31.01.21']}
-										title='test'
 										doneIntervals={doneIntervals}
 										updateInterval={updateInterval}
 										deleteInterval={deleteInterval}
