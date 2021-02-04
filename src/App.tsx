@@ -24,8 +24,6 @@ const defaultConfig = {
 }
 
 const App = () => {
-	const [activePomodoro, setActivePomodoro] = useLocalStorage('active', null)
-
 	const [doneIntervals, setDoneIntervals] = useLocalStorage('intervals', [])
 
 	const [config, setConfig] = useLocalStorage('config', defaultConfig)
@@ -65,7 +63,6 @@ const App = () => {
 									<TimerView
 										addInterval={addInterval}
 										config={config}
-										setActive={setActivePomodoro}
 										doneIntervals={doneIntervals.filter(
 											({ finished }: DoneInterval) => isSameDate(finished)
 										)}
