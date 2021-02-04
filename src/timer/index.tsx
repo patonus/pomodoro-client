@@ -7,6 +7,10 @@ import Head from '../Head'
 import ButtonBar from './Buttons'
 import useSound from 'use-sound'
 import notifySound from 'assets/notify.mp3'
+import useLocalStorage from 'useLocalStorage'
+import dayjs from 'dayjs'
+import * as workerTimers from 'worker-timers'
+
 interface Props {
 	onDone: (finished: string, isWork: boolean) => void
 	config: Config
@@ -15,11 +19,33 @@ interface Props {
 const Timer = ({ onDone, config }: Props) => {
 	const [playSound] = useSound(notifySound, { volume: config.volume / 100 })
 
-	const [current, send] = useMachine(generateTimerMachine(config, onDone))
-	const { elapsed, duration } = current.context
+	const [persistedState, setPersistedState] = useLocalStorage(
+		'timer-state',
+		null
+	)
+
+	const [current, send] = useMachine(generateTimerMachine(config, onDone), {
+		state: persistedState ? { ...persistedState, actions: [] } : null,
+	})
+	useEffect(() => {
+		setPersistedState(current)
+	}, [setPersistedState, current])
+
+	const { elapsed, duration, interval } = current.context
+	useEffect(() => {
+		const timer = workerTimers.setInterval(() => {
+			send('TICK')
+		}, interval)
+		return () => {
+			workerTimers.clearInterval(timer)
+		}
+	}, [interval, send])
+
 	const currentState = current.value.toString()
 	const isWork = currentState.includes('work')
-	const timeLeft = duration.subtract(elapsed, 'milliseconds').format('mm:ss')
+	const timeLeft = dayjs
+		.duration(duration * 60 * 1000 - elapsed)
+		.format('mm:ss')
 	useEffect(() => {
 		current.actions.filter(({ type }) => type.includes('submit')).length &&
 			playSound()
@@ -34,5 +60,4 @@ const Timer = ({ onDone, config }: Props) => {
 		</>
 	)
 }
-
 export default Timer

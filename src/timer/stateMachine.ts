@@ -1,9 +1,10 @@
 import dayjs from 'dayjs'
 import { Config } from '../interfaces'
 import { Machine, assign } from 'xstate'
-import * as workerTimers from 'worker-timers'
 
 const REFRESH_RATE = 1000
+const SECONDS = 60
+const MILLISECONDS = 1000
 
 const generateTimerMachine = (
 	config: Config,
@@ -16,7 +17,7 @@ const generateTimerMachine = (
 			context: {
 				elapsed: 0,
 				interval: REFRESH_RATE,
-				duration: dayjs.duration({ minutes: config.workDuration }),
+				duration: config.workDuration,
 				start: dayjs(),
 			},
 
@@ -36,17 +37,7 @@ const generateTimerMachine = (
 						cond: 'timeOut',
 						actions: 'submitWork',
 					},
-					invoke: {
-						src: (context) => (callback) => {
-							const interval = workerTimers.setInterval(() => {
-								callback('TICK')
-							}, context.interval)
 
-							return () => {
-								workerTimers.clearInterval(interval)
-							}
-						},
-					},
 					on: {
 						PAUSE: 'workPaused',
 						RESET: 'workBegin',
@@ -69,26 +60,18 @@ const generateTimerMachine = (
 				},
 				breakRunning: {
 					always: {
-						target: 'workBegin',
+						target: 'breakFinished',
 						cond: 'timeOut',
-						actions: 'submitBreak',
 					},
-					invoke: {
-						src: (context) => (send) => {
-							const interval = workerTimers.setInterval(() => {
-								send('TICK')
-							}, context.interval)
 
-							return () => {
-								workerTimers.clearInterval(interval)
-							}
-						},
-					},
 					on: {
 						PAUSE: 'breakPaused',
 						RESET: 'breakBegin',
 						TICK: { actions: 'incrementElapsed' },
 					},
+				},
+				breakFinished: {
+					always: { target: 'workBegin', actions: 'submitBreak' },
 				},
 				breakPaused: {
 					on: {
@@ -101,15 +84,16 @@ const generateTimerMachine = (
 		{
 			actions: {
 				initializeWork: assign((_context) => ({
-					duration: dayjs.duration({ minutes: config.workDuration }),
+					duration: config.workDuration,
 					elapsed: 0,
 				})),
 				initializeBreak: assign((_context) => ({
-					duration: dayjs.duration({ minutes: config.shortBreakDuration }),
+					duration: config.shortBreakDuration,
 					elapsed: 0,
 				})),
 				initializeTimer: assign((_context) => ({ start: dayjs() })),
 				incrementElapsed: assign(({ elapsed, interval }) => {
+					console.log('tick')
 					return {
 						elapsed: elapsed + interval,
 					}
@@ -123,7 +107,7 @@ const generateTimerMachine = (
 			},
 			guards: {
 				timeOut: ({ elapsed, duration }) => {
-					return elapsed >= duration.asMilliseconds()
+					return elapsed >= duration * SECONDS * MILLISECONDS
 				},
 			},
 		}
