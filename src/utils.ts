@@ -6,3 +6,4 @@ export const isSameDate = (dateToCompare: string, baseDate?: string) =>
 export const getDates = (dateTimes: string[]) => [
 	...new Set(dateTimes.map((dt) => dayjs(dt).format('YYYY-MM-DD'))),
 ]
+export const getNow = () => dayjs().valueOf()

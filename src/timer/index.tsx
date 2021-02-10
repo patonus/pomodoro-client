@@ -31,15 +31,15 @@ const Timer = ({ onDone, config }: Props) => {
 		setPersistedState(current)
 	}, [setPersistedState, current])
 
-	const { elapsed, duration, interval } = current.context
+	const { elapsed, duration, finishedNo } = current.context
 	useEffect(() => {
 		const timer = workerTimers.setInterval(() => {
 			send('TICK')
-		}, interval)
+		}, 500)
 		return () => {
 			workerTimers.clearInterval(timer)
 		}
-	}, [interval, send])
+	}, [send])
 
 	const currentState = current.value.toString()
 	const isWork = currentState.includes('work')
