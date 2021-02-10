@@ -31,7 +31,7 @@ const Timer = ({ onDone, config }: Props) => {
 		setPersistedState(current)
 	}, [setPersistedState, current])
 
-	const { elapsed, duration, finishedNo } = current.context
+	const { elapsed, duration } = current.context
 	useEffect(() => {
 		const timer = workerTimers.setInterval(() => {
 			send('TICK')
