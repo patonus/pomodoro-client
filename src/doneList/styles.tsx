@@ -8,6 +8,10 @@ export const FinishedContainer = Styled.div`
    border-radius: 3px;
 	box-shadow: 0 -2px 10px black;
 
+   @media (max-width: 800px) {
+      max-width:600px;  
+  }
+
 
 `
 
@@ -21,13 +25,13 @@ export const RecordHeader = Styled.div`
 
 export const DateTime = Styled.div`
    color:white; 
-   padding: 8px 0;
+   padding: 3px 0;
    font-size: 2em;
 
 `
 export const Icon = Styled.div`
-   padding: 8px 12px ;
-   font-size: 2em;
+   padding: 3px 12px 0 12px ;
+   font-size: 1.5em;
 
 `
 export const TrashButtonContainer = Styled.div`
@@ -36,16 +40,16 @@ export const TrashButton = Styled.button`
    background-color:inherit;
    border: none; 
    color:white; 
-   padding: 8px 12px;
+   padding: 3px 12px;
    border-radius: 25%;
-   font-size: 2em;
+   font-size: 1.5em;
    max-width:2em;
    justify-self: end;
-  cursor: pointer; 
+   cursor: pointer; 
 
-  &:hover{
-     filter: brightness(200%);
-  }
+   &:hover{
+      filter: brightness(200%);
+   }
 `
 
 export const DurationLabelContainer = Styled.div`
@@ -62,6 +66,11 @@ export const ListHeader = Styled.h2`
    padding: 0.5rem;
    font-size: 2.5em;
    max-width: 1000px;
+   @media (max-width: 800px) {
+		max-width:600px;
+      font-size: 1.5em;
 
+
+    }
   
 `
