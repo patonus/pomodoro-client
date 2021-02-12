@@ -27,11 +27,12 @@ const Timer = ({ onDone, config }: Props) => {
 	const [current, send] = useMachine(generateTimerMachine(config, onDone), {
 		state: persistedState ? { ...persistedState, actions: [] } : null,
 	})
+	const { elapsed, duration } = current.context
+
 	useEffect(() => {
 		setPersistedState(current)
 	}, [setPersistedState, current])
 
-	const { elapsed, duration } = current.context
 	useEffect(() => {
 		const timer = workerTimers.setInterval(() => {
 			send('TICK')
@@ -41,8 +42,7 @@ const Timer = ({ onDone, config }: Props) => {
 		}
 	}, [send])
 
-	const currentState = current.value.toString()
-	const isWork = currentState.includes('work')
+	const currentTimerState = String(Object.values(current.value)[0])
 	const timeLeft = dayjs
 		.duration(duration * 60 * 1000 - elapsed)
 		.format('mm:ss')
@@ -52,11 +52,11 @@ const Timer = ({ onDone, config }: Props) => {
 	}, [current, playSound])
 	return (
 		<>
-			<TimerContainer isWork={isWork}>
+			<TimerContainer isWork={current.matches('work')}>
 				<Clock>{timeLeft}</Clock>
-				<ButtonBar currentState={currentState} send={send} />
+				<ButtonBar currentState={currentTimerState} send={send} />
 			</TimerContainer>
-			<Head time={timeLeft} isWork={isWork} />
+			<Head time={timeLeft} isWork={current.matches('work')} />
 		</>
 	)
 }

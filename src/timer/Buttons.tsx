@@ -44,16 +44,13 @@ interface ButtonBarProps {
 }
 const ButtonBar = ({ currentState, ...props }: ButtonBarProps) => {
 	switch (currentState) {
-		case 'workBegin':
-		case 'breakBegin':
+		case 'initialized':
 			return <BeginButtons {...props} />
 
-		case 'workRunning':
-		case 'breakRunning':
+		case 'running':
 			return <RunningButtons {...props} />
 
-		case 'workPaused':
-		case 'breakPaused':
+		case 'paused':
 			return <StopButtons {...props} />
 		default:
 			return <div />

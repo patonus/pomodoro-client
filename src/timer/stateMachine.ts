@@ -25,7 +25,7 @@ const generateTimerMachine = (
 	Machine<TimerMachineContext>(
 		{
 			id: 'timer',
-			initial: 'workBegin',
+			initial: 'work',
 			context: {
 				elapsed: 0,
 				duration: config.workDuration,
@@ -35,98 +35,118 @@ const generateTimerMachine = (
 			},
 
 			states: {
-				workBegin: {
-					entry: 'initializeWork',
-					on: {
-						START: { target: 'workRunning', actions: 'initializeTimer' },
-						SKIP: 'breakBegin',
-					},
-				},
-				workRunning: {
-					always: {
-						target: 'workFinished',
-						cond: 'timeOut',
-						actions: 'submitWork',
-					},
-
-					on: {
-						PAUSE: { target: 'workPaused', actions: 'startPause' },
-						RESET: 'workBegin',
-						TICK: { actions: 'updateInterval' },
-					},
-				},
-				workFinished: {
-					always: [
-						{
-							target: 'breakBegin',
-							cond: ({ finishedNo }) => finishedNo !== config.pomodoroCount,
+				work: {
+					initial: 'initialized',
+					states: {
+						initialized: {
+							entry: 'initializeWork',
+							on: {
+								START: { target: 'running', actions: 'initializeTimer' },
+								SKIP: 'finished',
+							},
 						},
-						{
-							target: 'longBreakBegin',
-							cond: ({ finishedNo }) => finishedNo === config.pomodoroCount,
+						running: {
+							always: {
+								target: 'finished',
+								cond: 'timeOut',
+							},
+							on: {
+								PAUSE: { target: 'paused', actions: 'startPause' },
+								RESET: 'initialized',
+								TICK: { actions: 'updateInterval' },
+							},
 						},
-					],
-				},
-				workPaused: {
-					on: {
-						START: { target: 'workRunning', actions: 'endPause' },
-						RESET: 'workBegin',
+						paused: {
+							on: {
+								START: { target: 'running', actions: 'endPause' },
+								RESET: 'initialized',
+							},
+						},
+						finished: {
+							always: [
+								{
+									target: '#timer.shortBreak.initialized',
+									cond: ({ finishedNo }) => finishedNo !== config.pomodoroCount,
+								},
+								{
+									target: '#timer.longBreak.initialized',
+									cond: ({ finishedNo }) => finishedNo === config.pomodoroCount,
+								},
+							],
+						},
 					},
 				},
-				breakBegin: {
-					entry: 'initializeBreak',
-					on: {
-						START: { target: 'breakRunning', actions: 'initializeTimer' },
-						SKIP: 'workBegin',
+				shortBreak: {
+					initial: 'initialized',
+					states: {
+						initialized: {
+							entry: 'initializeShortBreak',
+							on: {
+								START: { target: 'running', actions: 'initializeTimer' },
+								SKIP: '#timer.work.initialized',
+							},
+						},
+						running: {
+							always: {
+								target: 'finished',
+								cond: 'timeOut',
+							},
+							on: {
+								PAUSE: { target: 'paused', actions: 'startPause' },
+								RESET: 'initialized',
+								TICK: { actions: 'updateInterval' },
+							},
+						},
+						paused: {
+							on: {
+								START: { target: 'running', actions: 'endPause' },
+								RESET: 'initialized',
+							},
+						},
+						finished: {
+							always: {
+								target: '#timer.work.initialized',
+								actions: 'submitBreak',
+							},
+						},
 					},
 				},
-				breakRunning: {
-					always: {
-						target: 'breakFinished',
-						cond: 'timeOut',
-					},
-
-					on: {
-						PAUSE: 'breakPaused',
-						RESET: 'breakBegin',
-						TICK: { actions: 'updateInterval' },
-					},
-				},
-				breakFinished: {
-					always: { target: 'workBegin', actions: 'submitBreak' },
-				},
-				breakPaused: {
-					on: {
-						START: 'breakRunning',
-						RESET: 'breakBegin',
-					},
-				},
-				longBreakBegin: {
-					entry: 'initializeLongBreak',
-					on: {
-						START: { target: 'longBreakRunning', actions: 'initializeTimer' },
-						SKIP: { target: 'workBegin', actions: 'resetFinishedCount' },
-					},
-				},
-				longBreakRunning: {
-					always: {
-						target: 'longBreakFinished',
-						cond: 'timeOut',
-					},
-
-					on: {
-						PAUSE: 'longBreakPaused',
-						RESET: 'longBreakBegin',
-						TICK: { actions: 'updateInterval' },
-					},
-				},
-				longBreakFinished: {
-					always: { target: 'workBegin', actions: 'submitLongBreak' },
-				},
-				longBreakPaused: {
-					on: {
-						START: 'longBreakRunning',
-						RESET: 'longBreakBegin',
+				longBreak: {
+					initial: 'initialized',
+					states: {
+						initialized: {
+							entry: 'initializeLongBreak',
+							on: {
+								START: { target: 'running', actions: 'initializeTimer' },
+								SKIP: {
+									target: '#timer.work.initialized',
+									actions: 'skipLongBreak',
+								},
+							},
+						},
+						running: {
+							always: {
+								target: 'finished',
+								cond: 'timeOut',
+							},
+							on: {
+								PAUSE: { target: 'paused', actions: 'startPause' },
+								RESET: 'initialized',
+								TICK: { actions: 'updateInterval' },
+							},
+						},
+						paused: {
+							on: {
+								START: { target: 'running', actions: 'endPause' },
+								RESET: 'initialized',
+							},
+						},
+						finished: {
+							always: {
+								target: '#timer.work.initialized',
+								actions: 'submitBreak',
+							},
+						},
 					},
 				},
 			},
@@ -150,7 +170,7 @@ const generateTimerMachine = (
 					start: 0,
 				})),
 
-				initializeBreak: assign((_context) => ({
+				initializeShortBreak: assign((_context) => ({
 					duration: config.shortBreakDuration,
 					elapsed: 0,
 					pauses: [],
@@ -180,9 +200,10 @@ const generateTimerMachine = (
 					onDone(dayjs().format(), false)
 				},
 				submitLongBreak: assign((_context) => {
-					onDone(dayjs().format(), true)
+					onDone(dayjs().format(), false)
 					return { finishedNo: 0 }
 				}),
+				skipLongBreak: assign((_context) => ({ finishedNo: 0 })),
 			},
 			guards: {
 				timeOut: ({ elapsed, duration }) => {
