@@ -12,6 +12,7 @@ import { FaTrash, FaCoffee } from 'react-icons/fa'
 import { GiReceiveMoney } from 'react-icons/gi'
 import TextField from '@material-ui/core/TextField'
 import dayjs from 'dayjs'
+import { useState } from 'react'
 interface Props {
 	doneIntervals: DoneInterval[]
 	updateInterval: (newInterval: DoneInterval) => void
@@ -27,30 +28,35 @@ interface DoneItemProps {
 	onUpdate: (newInterval: DoneInterval) => void
 	onDelete: (id: string) => void
 }
-const DoneItem = ({ interval, onUpdate, onDelete }: DoneItemProps) => (
-	<FinishedContainer key={interval.id}>
-		<RecordHeader>
-			<DurationLabelContainer>
-				<Icon>{interval.isWork ? <GiReceiveMoney /> : <FaCoffee />}</Icon>
-				<DateTime>{interval.duration + 'm'}</DateTime>
-			</DurationLabelContainer>
-			<DateTime>{formatDate(interval.finished)}</DateTime>
-			<TrashButton onClick={() => onDelete(interval.id)}>
-				<FaTrash />
-			</TrashButton>
-		</RecordHeader>
-		{interval.isWork ? (
-			<TextField
-				label='Description'
-				fullWidth
-				margin='normal'
-				multiline
-				variant='outlined'
-				onBlur={(e) => onUpdate({ ...interval, note: e.target.value })}
-			/>
-		) : null}
-	</FinishedContainer>
-)
+const DoneItem = ({ interval, onUpdate, onDelete }: DoneItemProps) => {
+	const [note, setNote] = useState(interval.note)
+	return (
+		<FinishedContainer key={interval.id}>
+			<RecordHeader>
+				<DurationLabelContainer>
+					<Icon>{interval.isWork ? <GiReceiveMoney /> : <FaCoffee />}</Icon>
+					<DateTime>{interval.duration + 'm'}</DateTime>
+				</DurationLabelContainer>
+				<DateTime>{formatDate(interval.finished)}</DateTime>
+				<TrashButton onClick={() => onDelete(interval.id)}>
+					<FaTrash />
+				</TrashButton>
+			</RecordHeader>
+			{interval.isWork ? (
+				<TextField
+					label='Description'
+					fullWidth
+					margin='normal'
+					multiline
+					variant='outlined'
+					onBlur={() => onUpdate({ ...interval, note: note })}
+					value={note}
+					onChange={(e) => setNote(e.target.value)}
+				/>
+			) : null}
+		</FinishedContainer>
+	)
+}
 
 const DoneList = ({
 	doneIntervals,
