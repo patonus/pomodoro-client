@@ -42,13 +42,14 @@ const generateTimerMachine = (
 							entry: 'initializeWork',
 							on: {
 								START: { target: 'running', actions: 'initializeTimer' },
-								SKIP: 'finished',
+								SKIP: '#timer.shortBreak.initialized',
 							},
 						},
 						running: {
 							always: {
 								target: 'finished',
 								cond: 'timeOut',
+								actions: 'incrementFinished',
 							},
 							on: {
 								PAUSE: { target: 'paused', actions: 'startPause' },
@@ -65,10 +66,12 @@ const generateTimerMachine = (
 						finished: {
 							always: [
 								{
+									actions: 'submitWork',
 									target: '#timer.shortBreak.initialized',
 									cond: ({ finishedNo }) => finishedNo !== config.pomodoroCount,
 								},
 								{
+									actions: 'submitWork',
 									target: '#timer.longBreak.initialized',
 									cond: ({ finishedNo }) => finishedNo === config.pomodoroCount,
 								},
@@ -191,9 +194,10 @@ const generateTimerMachine = (
 						start! -
 						pauses.reduce((sum, { start, end }) => sum + (end! - start), 0),
 				})),
-
-				submitWork: assign(({ finishedNo }) => {
+				submitWork: () => {
 					onDone(dayjs().format(), true)
+				},
+				incrementFinished: assign(({ finishedNo }) => {
 					return { finishedNo: finishedNo + 1 }
 				}),
 				submitBreak: () => {
