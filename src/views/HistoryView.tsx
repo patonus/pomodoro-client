@@ -6,6 +6,7 @@ import 'react-calendar/dist/Calendar.css'
 import Styled from 'styled-components/macro'
 import { isSameDate, getDates } from 'utils'
 import dayjs from 'dayjs'
+import Head from 'Head'
 
 interface Props {
 	doneIntervals: DoneInterval[]
@@ -50,6 +51,7 @@ const HistoryView = ({
 				updateInterval={updateInterval}
 				deleteInterval={deleteInterval}
 			/>
+			<Head title='History' />
 		</>
 	)
 }

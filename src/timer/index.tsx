@@ -56,7 +56,7 @@ const Timer = ({ onDone, config }: Props) => {
 				<Clock>{timeLeft}</Clock>
 				<ButtonBar currentState={currentTimerState} send={send} />
 			</TimerContainer>
-			<Head time={timeLeft} isWork={current.matches('work')} />
+			<Head title={timeLeft + ' ' + current.toStrings()[0]} />
 		</>
 	)
 }

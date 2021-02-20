@@ -42,7 +42,7 @@ const generateTimerMachine = (
 							entry: 'initializeWork',
 							on: {
 								START: { target: 'running', actions: 'initializeTimer' },
-								SKIP: '#timer.shortBreak.initialized',
+								SKIP: '#timer.short.initialized',
 							},
 						},
 						running: {
@@ -67,19 +67,19 @@ const generateTimerMachine = (
 							always: [
 								{
 									actions: 'submitWork',
-									target: '#timer.shortBreak.initialized',
+									target: '#timer.short.initialized',
 									cond: ({ finishedNo }) => finishedNo !== config.pomodoroCount,
 								},
 								{
 									actions: 'submitWork',
-									target: '#timer.longBreak.initialized',
+									target: '#timer.long.initialized',
 									cond: ({ finishedNo }) => finishedNo === config.pomodoroCount,
 								},
 							],
 						},
 					},
 				},
-				shortBreak: {
+				short: {
 					initial: 'initialized',
 					states: {
 						initialized: {
@@ -114,7 +114,7 @@ const generateTimerMachine = (
 						},
 					},
 				},
-				longBreak: {
+				long: {
 					initial: 'initialized',
 					states: {
 						initialized: {
